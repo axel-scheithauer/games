@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   width="100%"
+   height="100%"
+   onload='Init(evt)' 
+   id="svg2">
+        <script><![CDATA[
+		var boardSize=8;
+		var cellSize=100;
+		var SVGDocument = null;
+		var SVGRoot = null;
+		var posX=0;
+		var posY=0;
+		var dragX=0;
+		var dragY=0;
+		var dragObject=null;
+		// bit patterns for colors
+		var cyan=4; //100
+		var magenta=2; // 010
+		var yellow=1; //001
+		var black=7;//111
+		var white=0;//000
+		var colorNames=["white","yellow","magenta","red","cyan","green","blue","black"];
+		var boardsize=8;
+				
+		function liftPane(e){
+			dragObject=e;
+			dragX=posX-dragObject.offsetLeft;
+			dragY=posY-dragObject.offsetTop;
+		};
+		
+		function dropPane(evt){
+		var dropTarget=null;
+			if (dragObject==null) {return; };
+			dropOn(dragObject,evt.clientX,evt.clientY);
+			dragObject=null;
+			evt.stopPropagation();
+		};
+		
+		function movePane(e,x,y){
+			e.setAttribute("x",x*cellSize+8);
+			e.setAttribute("y",y*cellSize+8);			
+		}
+				
+		function findMiddle(source,i,j){
+			sPos=getPosition(source);
+			deltaI=i-sPos.i;
+			deltaJ=j-sPos.j;
+			mI=Math.floor(deltaI/2);
+			mJ=Math.floor(deltaJ/2);
+			if (((Math.abs(mI)==1) | (mI==0)) & ((Math.abs(mJ)==1) | (mJ==0)) & !(mI==0 & mJ == 0)){
+				return PaneFromIndex(sPos.i+mI,sPos.j+mJ);
+			};
+		}
+		
+		function getPosition(pane){
+			return {i: Math.floor(pane.getAttribute("x")/ cellSize),j: Math.floor(pane.getAttribute("y")/ cellSize)};
+		}
+		
+		function PaneFromPoint(x,y){
+			e=SVGDocument.elementFromPoint(x,y);
+			if (e!=null){if (e.hasAttribute("CMY")){return e;};};
+		}
+		
+		function PaneFromIndex(i,j){
+			return PaneFromPoint((i+0.5)*cellSize,(j+0.5)*cellSize);
+		};
+				
+		function dropOn(source,x,y){
+			if ((x>boardSize*cellSize) | (y>boardSize*cellSize) |(x<0)|(y<0)){console.log("out of board");return false;};
+			target=PaneFromPoint(x,y);
+			if (target==source){return false;};
+			i=Math.floor(x / cellSize);
+			j=Math.floor(y /cellSize);
+			middle = findMiddle(source,i,j);
+			if (middle==null){console.log("no middle");return false};
+			sourceColor=source.getAttribute("CMY");
+			middleColor=middle.getAttribute("CMY");
+			if (sourceColor != (sourceColor & middleColor)) {console.log("source color not in middle color");return false;};
+			newMiddleColor= (~sourceColor & middleColor);// substract color from middle pane
+			if (target==null){
+				movePane(source,i,j);
+			}
+			else {
+				targetColor=target.getAttribute("CMY");
+				newColor=sourceColor | targetColor; //mix colors subtractively
+				if (sourceColor & targetColor) {console.log("target field is occupied by "+colorNames[targetColor]);return false};// base color may not be included in target.
+				if (newColor==black) {console.log("new color would be black");return false}; 
+				setCMY(target,newColor);
+				SVGRoot.removeChild(source);
+			}
+			if (newMiddleColor==white){SVGRoot.removeChild(middle);} else {setCMY(middle, newMiddleColor);};
+			return true;
+		}
+		
+		function setCMY(e,color){
+			e.setAttribute("CMY",color);
+			e.style.fill=colorString(color);
+		}
+		
+            function dragPane (evt){ 
+				x=Math.floor(evt.clientX / cellSize);
+				y=Math.floor(evt.clientY /cellSize);
+				posX = document.all ? window.event.clientX : evt.pageX;
+				posY = document.all ? window.event.clientY : evt.pageY;
+				if(dragObject != null) {
+					dragObject.x = (posX - dragX) + "px";
+					dragObject.y = (posY - dragY) + "px";
+				}
+			};
+			
+			function Init(evt){
+			    SVGDocument = evt.target.ownerDocument;
+				SVGRoot = SVGDocument.documentElement;
+				SVGRoot.setAttribute("onmouseup","dropPane(evt)");
+				for (var j=0;j<8;j++){
+				for (var i=0;i<8;i++){
+					addPane(i,j,RandomColor());
+				};
+				};
+			};
+		
+		function colorString(color){
+			var result="#";
+			if (color & cyan) {result=result+"00"} else {result=result+"FF"};
+			if (color & magenta) {result=result+"00"} else {result=result+"FF"};
+			if (color & yellow) {result=result+"00"} else {result=result+"FF"};
+			return result;
+		};
+		
+		function RandomColor(){
+			i=Math.floor(Math.random()*6)+1;
+			return i;
+		};
+
+		function addPane(i,j,color){
+			var e = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create a path in SVG's namespace
+			e.setAttribute("id",i + "~"+j);
+			x=i*cellSize;
+			y=j*cellSize;
+			e.setAttribute("width","84");
+			e.setAttribute("height","84");
+			e.setAttribute("style","fill:#FFFFFF;stroke:#000000; stroke-width:1;stroke-linecap:butt;stroke-miterlimit:10;stroke-opacity:1;stroke-dasharray:none");
+			e.setAttribute("x",x+8);
+			e.setAttribute("y",y+8);
+			e.setAttribute("onmousedown","liftPane(this)");
+			e.setAttribute("onmousemove","dragPane(evt)");
+			e.setAttribute("onmouseup","dropPane(evt)");
+			//e.setCMY = function ;
+			setCMY(e,color);
+			SVGRoot.appendChild(e);
+		};
+			]]>
+        </script>
+   <defs>
+  <g id="Cell">
+    <path
+       style="fill:#2b2b2b;stroke:#2b2b2b;stroke-width:1px;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 7,7 0,86 1,-1 0,-84 84,0 1,-1 -86,0"
+       id="shadowDark"
+       />
+    <path
+       style="fill:#2b2b2b;stroke:#d2d2d2;stroke-width:1px;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 93,93 -85,0 1,-1 83,0 0,-83 1,-1 0,1 0,83"
+       id="shadowLight"
+        />
+    <rect
+       style="fill:none;stroke:#a94300;stroke-width:11;stroke-linecap:butt;stroke-miterlimit:10;stroke-opacity:1;stroke-dasharray:none"
+       id="spacer"
+       width="100"
+       height="100"
+       x="0"
+       y="0" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-miterlimit:10;stroke-opacity:1;stroke-dasharray:none"
+       id="cellframe" onclick="liftPane(evt)"
+       width="88"
+       height="88"
+       x="6"
+       y="6"
+       ry="0" />
+  </g>
+  <g id="Row">
+    <use xlink:href="#Cell"/>
+    <use xlink:href="#Cell" x="100" y="0"/>
+    <use xlink:href="#Cell" x="200" y="0"/>
+    <use xlink:href="#Cell" x="300" y="0"/>
+    <use xlink:href="#Cell" x="400" y="0"/>
+    <use xlink:href="#Cell" x="500" y="0"/>
+    <use xlink:href="#Cell" x="600" y="0"/>
+    <use xlink:href="#Cell" x="700" y="0"/>
+  </g>
+  </defs>
+ <use xlink:href="#Row"/>
+ <use xlink:href="#Row" y="100"/>
+ <use xlink:href="#Row" y="200"/>
+ <use xlink:href="#Row" y="300"/>
+ <use xlink:href="#Row" y="400"/>
+ <use xlink:href="#Row" y="500"/>
+ <use xlink:href="#Row" y="600"/>
+ <use xlink:href="#Row" y="700"/>
+</svg>
