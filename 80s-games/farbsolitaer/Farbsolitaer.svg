@@ -46,7 +46,7 @@
 		}
 				
 		function findMiddle(source,i,j){
-			sPos=getPosition(source);
+			sPos=source.getPosition();
 			deltaI=i-sPos.i;
 			deltaJ=j-sPos.j;
 			mI=Math.floor(deltaI/2);
@@ -56,9 +56,6 @@
 			};
 		}
 		
-		function getPosition(pane){
-			return {i: Math.floor(pane.getAttribute("x")/ cellSize),j: Math.floor(pane.getAttribute("y")/ cellSize)};
-		}
 		
 		function PaneFromPoint(x,y){
 			e=SVGDocument.elementFromPoint(x,y);
@@ -141,6 +138,9 @@
 			e.setAttribute("style","fill:#FFFFFF;stroke:#000000; stroke-width:1;stroke-linecap:butt;stroke-miterlimit:10;stroke-opacity:1;stroke-dasharray:none");
 			e.setAttribute("x",x+8);
 			e.setAttribute("y",y+8);
+			e.getPosition = function (){
+				return {i: Math.floor(this.getAttribute("x")/ cellSize),j: Math.floor(this.getAttribute("y")/ cellSize)};
+			};
 			e.setAttribute("onmousedown","liftPane(this)");
 			e.setAttribute("onmousemove","dragPane(evt)");
 			e.setAttribute("onmouseup","dropPane(evt)");
