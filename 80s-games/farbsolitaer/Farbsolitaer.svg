@@ -79,8 +79,7 @@
 			if (middle==null){console.log("no middle");return false};
 			sourceColor=source.getCMY();
 			middleColor=middle.getCMY();
-			//(!middle.containsColor(source))
-			if (sourceColor != (sourceColor & middleColor)) {console.log("source color not in middle color");return false;};
+			if (!middle.containsColor(source)) {console.log("source color not in middle color");return false;};
 			newMiddleColor= (~sourceColor & middleColor);// substract color from middle pane
 			if (target==null){
 				movePane(source,i,j);
@@ -152,7 +151,8 @@
 			e.getCMY = function(){
 				return this.getAttribute("CMY");
 			};
-			e.containsColor = function(pane){
+			e.containsColor = function(other){
+				return other.getCMY()==(this.getCMY() & other.getCMY())
 			};
 			e.setCMY(color);
 			SVGRoot.appendChild(e);
