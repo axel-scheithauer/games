@@ -77,15 +77,16 @@
 			j=Math.floor(y /cellSize);
 			middle = findMiddle(source,i,j);
 			if (middle==null){console.log("no middle");return false};
-			sourceColor=source.getAttribute("CMY");
-			middleColor=middle.getAttribute("CMY");
+			sourceColor=source.getCMY();
+			middleColor=middle.getCMY();
+			//(!middle.containsColor(source))
 			if (sourceColor != (sourceColor & middleColor)) {console.log("source color not in middle color");return false;};
 			newMiddleColor= (~sourceColor & middleColor);// substract color from middle pane
 			if (target==null){
 				movePane(source,i,j);
 			}
 			else {
-				targetColor=target.getAttribute("CMY");
+				targetColor=target.getCMY();
 				newColor=sourceColor | targetColor; //mix colors subtractively
 				if (sourceColor & targetColor) {console.log("target field is occupied by "+colorNames[targetColor]);return false};// base color may not be included in target.
 				if (newColor==black) {console.log("new color would be black");return false}; 
@@ -95,12 +96,6 @@
 			if (newMiddleColor==white){SVGRoot.removeChild(middle);} else {middle.setCMY(newMiddleColor);};
 			return true;
 		}
-
-
-
-
-
-
 				
             function dragPane (evt){ 
 				x=Math.floor(evt.clientX / cellSize);
@@ -153,6 +148,11 @@
 			e.setCMY = function (color){
 				this.setAttribute("CMY",color);
 				this.style.fill=colorString(color);
+			};
+			e.getCMY = function(){
+				return this.getAttribute("CMY");
+			};
+			e.containsColor = function(pane){
 			};
 			e.setCMY(color);
 			SVGRoot.appendChild(e);
