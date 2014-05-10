@@ -89,18 +89,19 @@
 				newColor=sourceColor | targetColor; //mix colors subtractively
 				if (sourceColor & targetColor) {console.log("target field is occupied by "+colorNames[targetColor]);return false};// base color may not be included in target.
 				if (newColor==black) {console.log("new color would be black");return false}; 
-				setCMY(target,newColor);
+				target.setCMY(newColor);
 				SVGRoot.removeChild(source);
 			}
-			if (newMiddleColor==white){SVGRoot.removeChild(middle);} else {setCMY(middle, newMiddleColor);};
+			if (newMiddleColor==white){SVGRoot.removeChild(middle);} else {middle.setCMY(newMiddleColor);};
 			return true;
 		}
-		
-		function setCMY(e,color){
-			e.setAttribute("CMY",color);
-			e.style.fill=colorString(color);
-		}
-		
+
+
+
+
+
+
+				
             function dragPane (evt){ 
 				x=Math.floor(evt.clientX / cellSize);
 				y=Math.floor(evt.clientY /cellSize);
@@ -149,8 +150,11 @@
 			e.setAttribute("onmousedown","liftPane(this)");
 			e.setAttribute("onmousemove","dragPane(evt)");
 			e.setAttribute("onmouseup","dropPane(evt)");
-			//e.setCMY = function ;
-			setCMY(e,color);
+			e.setCMY = function (color){
+				this.setAttribute("CMY",color);
+				this.style.fill=colorString(color);
+			};
+			e.setCMY(color);
 			SVGRoot.appendChild(e);
 		};
 			]]>
