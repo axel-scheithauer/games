@@ -87,7 +87,7 @@
 			else {
 				targetColor=target.getCMY();
 				newColor=sourceColor | targetColor; //mix colors subtractively
-				if (sourceColor & targetColor) {console.log("target field is occupied by "+colorNames[targetColor]);return false};// base color may not be included in target.
+				if (target.containsColor(source)) {console.log("target field is occupied by "+colorNames[targetColor]);return false};// base color may not be included in target.
 				if (newColor==black) {console.log("new color would be black");return false}; 
 				target.setCMY(newColor);
 				SVGRoot.removeChild(source);
