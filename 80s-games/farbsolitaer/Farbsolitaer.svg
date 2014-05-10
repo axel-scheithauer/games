@@ -39,12 +39,7 @@
 			dragObject=null;
 			evt.stopPropagation();
 		};
-		
-		function movePane(e,x,y){
-			e.setAttribute("x",x*cellSize+8);
-			e.setAttribute("y",y*cellSize+8);			
-		}
-				
+						
 		function findMiddle(source,i,j){
 			sPos=source.getPosition();
 			deltaI=i-sPos.i;
@@ -79,7 +74,7 @@
 			if (!middle.containsColor(source)) {console.log("source color not in middle color");return false;};
 			newMiddleColor= (~sourceColor & middleColor);// substract color from middle pane
 			if (target==null){
-				movePane(source,i,j);
+				source.setPosition({i:i,j:j});
 			}
 			else {
 				targetColor=target.getCMY();
@@ -140,6 +135,10 @@
 			e.setAttribute("y",y+8);
 			e.getPosition = function (){
 				return {i: Math.floor(this.getAttribute("x")/ cellSize),j: Math.floor(this.getAttribute("y")/ cellSize)};
+			};
+			e.setPosition = function (pos){
+				this.setAttribute("x",pos.i*cellSize+8);
+				this.setAttribute("y",pos.j*cellSize+8);			
 			};
 			e.setAttribute("onmousedown","liftPane(this)");
 			e.setAttribute("onmousemove","dragPane(evt)");
